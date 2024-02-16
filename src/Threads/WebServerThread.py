@@ -6,17 +6,20 @@ from flask import Flask, render_template, request
 import multiprocessing
 
 app = Flask(__name__)
-ServerData = ""
+ServerTasks = ""
+ServerThreads = ""
 
 class WebServerThread(threading.Thread):
-    def __init__(self, name, sleepTime=10, serverData="", debug=False):
+    def __init__(self, name, serverTasks, serverThreads, sleepTime=10, debug=False):
         threading.Thread.__init__(self)
         self.name = name
         self.sleepTime = sleepTime
         self.debug = debug
         self.running = True
-        global ServerData
-        ServerData = serverData
+        global ServerTasks
+        ServerTasks = serverTasks
+        global ServerThreads
+        ServerThreads = serverThreads
 
     def __del__(self):
         print(self.name + " | deleted!")
@@ -39,15 +42,28 @@ class WebServerThread(threading.Thread):
 
     @app.route('/API/GET/<apiRequest>')
     def apiGET(apiRequest):
-        global ServerData
-        print(ServerData)
-        return render_template('apiGET.html', answer=str(ServerData))
+        global ServerTasks, ServerThreads
+        answer = ""
+        match apiRequest:
+            case "allRunningThreads":
+                for thread in ServerThreads:
+                    answer += thread.name + " "
+            case "amountOfRunningThreads":
+                answer = len(ServerThreads)
+            case "amountOfServerTasks":
+                answer = len(ServerTasks)
+            case "currentServerTasks":
+                answer = ServerTasks
+            case _:
+                answer = "ERROR - requestNotFound"
+
+        return render_template('apiGET.html', answer=str(answer))
 
     @app.route('/API/POST/<apiRequest>')
     def apiPOST(apiRequest):
-        global ServerData
-        ServerData.append(apiRequest)
-        return "POST | " + str(apiRequest)
+        global ServerTasks
+        ServerTasks.append(apiRequest)
+        return render_template('apiGET.html', answer=str("Send successfully!"))
 
 
 

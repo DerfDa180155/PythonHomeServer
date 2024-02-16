@@ -29,7 +29,7 @@ class Server:
         # init Threads
         #self.threads.append(TestThread.TestThread(name="TestThread", sleepTime=5, debug=self.debug))
         self.threads.append(MQTTThread.MQTTThread(name="MQTTThread", sleepTime=5, serverData=self.tasks, debug=self.debug))
-        self.threads.append(WebServerThread.WebServerThread(name="WebServerThread", sleepTime=5, serverData=self.tasks, debug=self.debug))
+        self.threads.append(WebServerThread.WebServerThread(name="WebServerThread", serverTasks=self.tasks, serverThreads=self.threads, sleepTime=5,  debug=self.debug))
 
         # MQTT Setup
         self.client = mqtt.Client()  # init MQTT client
@@ -82,6 +82,7 @@ class Server:
                             thread.running = False
                             self.threads.remove(thread)
                             self.MQTTSendData(thread.name + " | stopped!")
+                            print(thread.name + " | stopped!")
                             thread.join()
                             del thread
                             gc.collect()  # to completely delete the thread
