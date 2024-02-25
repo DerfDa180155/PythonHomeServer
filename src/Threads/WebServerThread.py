@@ -2,7 +2,8 @@ import threading
 import time
 import os
 import signal
-from flask import Flask, render_template, request
+from flask import Flask, render_template, jsonify
+from flask_cors import CORS, cross_origin
 import multiprocessing
 
 app = Flask(__name__)
@@ -41,10 +42,13 @@ class WebServerThread(threading.Thread):
         return render_template('mainPage.html')
 
     @app.route('/API/GET/<apiRequest>')
+    @cross_origin()
     def apiGET(apiRequest):
         global ServerTasks, ServerThreads
         answer = ""
         match apiRequest:
+            case "serverStatus":
+                answer = "Running"
             case "allRunningThreads":
                 for thread in ServerThreads:
                     answer += thread.name + " "
@@ -57,9 +61,16 @@ class WebServerThread(threading.Thread):
             case _:
                 answer = "ERROR - requestNotFound"
 
-        return render_template('apiGET.html', answer=str(answer))
+        data = {
+            "answer": answer
+        }
+
+        return jsonify(data)
+
+        #return render_template('apiGET.html', answer=str(answer))
 
     @app.route('/API/POST/<apiRequest>')
+    @cross_origin()
     def apiPOST(apiRequest):
         global ServerTasks
         ServerTasks.append(apiRequest)

@@ -62,6 +62,7 @@ class Server:
                         if thread.name == data[1]:
                             isRunning = True
                     if not isRunning:
+                        oldLength = len(self.threads)
                         match data[1]:
                             case "TestThread":
                                 self.threads.append(TestThread.TestThread(name="TestThread", sleepTime=5, debug=self.debug))
@@ -69,10 +70,13 @@ class Server:
                                 self.threads.append(WebServerThread.WebServerThread(name="WebServerThread", sleepTime=5, serverData=self.tasks, debug=self.debug))
                             case "MQTTThread":
                                 self.threads.append(MQTTThread.MQTTThread(name="MQTTThread", sleepTime=5, serverData=self.tasks, debug=self.debug))
-                        self.threads[len(self.threads) - 1].start()
-                        self.MQTTSendData(self.threads[len(self.threads) - 1].name + " | started!")
+                        if oldLength < len(self.threads):
+                            self.threads[len(self.threads) - 1].start()
+                            self.MQTTSendData(self.threads[len(self.threads) - 1].name + " | started!")
+                        elif self.debug:
+                            print("Thread could not be started!")
                     elif self.debug:
-                        print("Thread was already Started")
+                        print("Thread was already started!")
 
                 elif data[0] == "Stop":
                     if data[1] == "Server":
