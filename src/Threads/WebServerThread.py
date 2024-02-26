@@ -74,7 +74,13 @@ class WebServerThread(threading.Thread):
     def apiPOST(apiRequest):
         global ServerTasks
         ServerTasks.append(apiRequest)
-        return render_template('apiGET.html', answer=str("Send successfully!"))
+
+        data = {
+            "answer": "Send successfully!"
+        }
+
+        return jsonify(data)
+        #return render_template('apiGET.html', answer=str("Send successfully!"))
 
 
 
